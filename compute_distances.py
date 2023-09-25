@@ -47,12 +47,12 @@ for subject in tqdm.tqdm(subjects):
         dist_Tpeak_v1_L = analysis.calc_roi_dist(surfL, cortex_L, TpeakTempL, v1L, dist_type='min')
         dist_Tpeak_v1_R = analysis.calc_roi_dist(surfR, cortex_R, TpeakTempR, v1R, dist_type='min')
 
-        if not os.path.exists(f'./distances_task.csv'):
+        if not os.path.exists(f'./distances.csv'):
             df = pd.DataFrame(columns=['participant_id', 'Dist to A1, LH', 'Dist to A1, RH', 'Dist to V1, LH', 'Dist to V1, RH'])
-            df.to_csv('./distances_task.csv', index=False)
+            df.to_csv('./distances.csv', index=False)
 
         print(f"Writing results for subject {subject}")
-        with open('distances_task.csv', mode='a', newline='') as file:
+        with open('distances.csv', mode='a', newline='') as file:
             # Create a CSV writer object
             writer = csv.writer(file)
 
@@ -62,8 +62,5 @@ for subject in tqdm.tqdm(subjects):
         print(f"Error for subject {subject}: {e}")
 
 print("Distances computed.")
-
-    
-
 
 
