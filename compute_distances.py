@@ -10,8 +10,16 @@ from surfdist import analysis
 import tqdm
 import csv
 
-TpeakTempL = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh10_L.npy')
-TpeakTempR = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh10_R.npy')
+individual = sys.argv[1]
+if individual == 'ind':
+    individual = True
+else:
+    individual = False
+
+if not individual:
+    TpeakTempL = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_L.npy')
+    TpeakTempR = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_R.npy')
+
 data_path = '/home/victoria/server/data/COST/COST_mri/derivatives/rest'
 subjects = FmriPreppedDataSet(data_path).subjects.tolist()
 
@@ -22,6 +30,10 @@ cortex_R = np.where(fsLR_labels_R != 0)[0]
 
 for subject in tqdm.tqdm(subjects):
     try:
+        if individual:
+            TpeakTempL = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_sub-{subject}.npy')
+            TpeakTempR = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_sub-{subject}.npy')
+
         surfL = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-L_midthickness.32k_fs_LR.surf.gii")
         surfR = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-R_midthickness.32k_fs_LR.surf.gii")
 
