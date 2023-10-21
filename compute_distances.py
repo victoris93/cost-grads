@@ -11,14 +11,16 @@ import tqdm
 import csv
 
 individual = sys.argv[1]
+zone = sys.argv[2]
+
 if individual == 'ind':
     individual = True
 else:
     individual = False
 
 if not individual:
-    TpeakTempL = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_L.npy')
-    TpeakTempR = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_R.npy')
+    TpeakL = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_L.npy')
+    TpeakR = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_R.npy')
 
 data_path = '/home/victoria/server/data/COST/COST_mri/derivatives/rest'
 subjects = FmriPreppedDataSet(data_path).subjects.tolist()
@@ -31,8 +33,8 @@ cortex_R = np.where(fsLR_labels_R != 0)[0]
 for subject in tqdm.tqdm(subjects):
     try:
         if individual:
-            TpeakTempL = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_sub-{subject}.npy')
-            TpeakTempR = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_sub-{subject}.npy')
+            TpeakL = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_{zone}_sub-{subject}.npy')
+            TpeakR = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_{zone}_sub-{subject}.npy')
 
         surfL = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-L_midthickness.32k_fs_LR.surf.gii")
         surfR = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-R_midthickness.32k_fs_LR.surf.gii")
@@ -53,11 +55,11 @@ for subject in tqdm.tqdm(subjects):
         v1L = np.where((parc_sub_L == 43) | (parc_sub_L == 45))[0]
         v1R = np.where((parc_sub_R == 43) | (parc_sub_R == 45))[0]
 
-        dist_Tpeak_a1_L = analysis.calc_roi_dist(surfL, cortex_L, TpeakTempL, a1L, dist_type='min')
-        dist_Tpeak_a1_R = analysis.calc_roi_dist(surfR, cortex_R, TpeakTempR, a1R, dist_type='min')
+        dist_Tpeak_a1_L = analysis.calc_roi_dist(surfL, cortex_L, TpeakL, a1L, dist_type='min')
+        dist_Tpeak_a1_R = analysis.calc_roi_dist(surfR, cortex_R, TpeakR, a1R, dist_type='min')
 
-        dist_Tpeak_v1_L = analysis.calc_roi_dist(surfL, cortex_L, TpeakTempL, v1L, dist_type='min')
-        dist_Tpeak_v1_R = analysis.calc_roi_dist(surfR, cortex_R, TpeakTempR, v1R, dist_type='min')
+        dist_Tpeak_v1_L = analysis.calc_roi_dist(surfL, cortex_L, TpeakL, v1L, dist_type='min')
+        dist_Tpeak_v1_R = analysis.calc_roi_dist(surfR, cortex_R, TpeakR, v1R, dist_type='min')
 
         if not os.path.exists(f'./distances.csv'):
             df = pd.DataFrame(columns=['participant_id', 'Dist to A1, LH', 'Dist to A1, RH', 'Dist to V1, LH', 'Dist to V1, RH'])

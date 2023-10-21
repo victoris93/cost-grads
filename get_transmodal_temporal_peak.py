@@ -7,7 +7,15 @@ import pandas as pd
 from NeuroConn.preprocessing.preprocessing import FmriPreppedDataSet
 import tqdm
 
+# for temporal: zones 5 (L) and 2 (R)
+# for parietal: zones 2 (L) and 3 (R)
+
 individual = sys.argv[1]
+zone = sys.argv[2]
+if zone == 'temporal':
+    zoneL, zoneR = 5, 2
+elif zone == 'parietal':
+    zoneL, zoneR = 2, 3
 
 if individual == 'ind':
     individual = True
@@ -23,18 +31,18 @@ if not individual:
     grad2L[np.where(grad2L > np.percentile(grad2L, 5))[0]] = np.nan
     grad2R = grads[1][32492:]
     grad2R[np.where(grad2R > np.percentile(grad2R, 5))[0]] = np.nan
-    TpeakTempL = grad2L.copy()
-    TpeakTempR = grad2R.copy()
+    TpeakL = grad2L.copy()
+    TpeakR = grad2R.copy()
 
-    temp_zone_indL = np.where(fsLR_labels_L != 5)[0]
-    temp_zone_indR = np.where(fsLR_labels_R != 2)[0]
-    TpeakTempL[temp_zone_indL] = np.nan
-    TpeakTempL = np.where(np.isnan(TpeakTempL) == False)[0]
-    TpeakTempR[temp_zone_indR] = np.nan
-    TpeakTempR = np.where(np.isnan(TpeakTempR) == False)[0]
+    temp_zone_indL = np.where(fsLR_labels_L != 2)[0]
+    temp_zone_indR = np.where(fsLR_labels_R != 3)[0]
+    TpeakL[temp_zone_indL] = np.nan
+    TpeakL = np.where(np.isnan(TpeakL) == False)[0]
+    TpeakR[temp_zone_indR] = np.nan
+    TpeakR = np.where(np.isnan(TpeakR) == False)[0]
 
-    np.save('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/COST_grad2_thresh5_L.npy', TpeakTempL)
-    np.save('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/COST_grad2_thresh5_R.npy', TpeakTempR)
+    np.save('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/COST_grad2_thresh5_L.npy', TpeakL)
+    np.save('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/COST_grad2_thresh5_R.npy', TpeakR)
 else:
     data_path = '/home/victoria/server/data/COST/COST_mri/derivatives/rest'
     subjects = FmriPreppedDataSet(data_path).subjects.tolist()
@@ -46,18 +54,18 @@ else:
             grad2L[np.where(grad2L > np.percentile(grad2L, 5))[0]] = np.nan
             grad2R = grads[1][32492:]
             grad2R[np.where(grad2R > np.percentile(grad2R, 5))[0]] = np.nan
-            TpeakTempL = grad2L.copy()
-            TpeakTempR = grad2R.copy()
+            TpeakL = grad2L.copy()
+            TpeakR = grad2R.copy()
 
-            temp_zone_indL = np.where(fsLR_labels_L != 5)[0]
-            temp_zone_indR = np.where(fsLR_labels_R != 2)[0]
-            TpeakTempL[temp_zone_indL] = np.nan
-            TpeakTempL = np.where(np.isnan(TpeakTempL) == False)[0]
-            TpeakTempR[temp_zone_indR] = np.nan
-            TpeakTempR = np.where(np.isnan(TpeakTempR) == False)[0]
+            zone_indL = np.where(fsLR_labels_L != zoneL)[0]
+            zone_indR = np.where(fsLR_labels_R != zoneR)[0]
+            TpeakL[zone_indL] = np.nan
+            TpeakL = np.where(np.isnan(TpeakL) == False)[0]
+            TpeakR[zone_indR] = np.nan
+            TpeakR = np.where(np.isnan(TpeakR) == False)[0]
 
-            np.save(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_sub-{subject}.npy', TpeakTempL)
-            np.save(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_sub-{subject}.npy', TpeakTempR)
+            np.save(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_{zone}_sub-{subject}.npy', TpeakL)
+            np.save(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_{zone}_sub-{subject}.npy', TpeakR)
         except Exception as e:
             print(f"Error for subject {subject}: {e}")
 
