@@ -7,6 +7,7 @@ sys.path.append('/home/victoria/surfdist')
 import pandas as pd
 from NeuroConn.preprocessing.preprocessing import FmriPreppedDataSet
 from surfdist import analysis
+from utils import get_transmodal_node
 import tqdm
 import csv
 
@@ -33,8 +34,11 @@ cortex_R = np.where(fsLR_labels_R != 0)[0]
 for subject in tqdm.tqdm(subjects):
     try:
         if individual:
-            TpeakL = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_{zone}_sub-{subject}.npy')
-            TpeakR = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_{zone}_sub-{subject}.npy')
+            # TpeakL = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_{zone}_sub-{subject}.npy')
+            # TpeakR = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_{zone}_sub-{subject}.npy')
+            Tpeaks = get_transmodal_node(data_path, subject, (43, 45), peak = zone)
+            TpeakL = Tpeaks[0]
+            TpeakR = Tpeaks[1]
 
         surfL = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-L_midthickness.32k_fs_LR.surf.gii")
         surfR = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-R_midthickness.32k_fs_LR.surf.gii")
