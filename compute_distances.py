@@ -11,18 +11,6 @@ from utils import get_transmodal_node
 import tqdm
 import csv
 
-individual = sys.argv[1]
-zone = sys.argv[2]
-
-if individual == 'ind':
-    individual = True
-else:
-    individual = False
-
-if not individual:
-    TpeakL = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_L.npy')
-    TpeakR = np.load('/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/COST_grad2_thresh5_R.npy')
-
 data_path = '/home/victoria/server/data/COST/COST_mri/derivatives/rest'
 subjects = FmriPreppedDataSet(data_path).subjects.tolist()
 
@@ -33,12 +21,6 @@ cortex_R = np.where(fsLR_labels_R != 0)[0]
 
 for subject in tqdm.tqdm(subjects):
     try:
-        if individual:
-            # TpeakL = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_L_{zone}_sub-{subject}.npy')
-            # TpeakR = np.load(f'/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/gradients/thresholded/aligned_grad2_thresh5_R_{zone}_sub-{subject}.npy')
-            Tpeaks = get_transmodal_node(data_path, subject, (43, 45), peak = zone)
-            TpeakL = Tpeaks[0]
-            TpeakR = Tpeaks[1]
 
         surfL = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-L_midthickness.32k_fs_LR.surf.gii")
         surfR = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/rest/derivatives/sub-{subject}/anat/sub-{subject}_hemi-R_midthickness.32k_fs_LR.surf.gii")
@@ -51,31 +33,28 @@ for subject in tqdm.tqdm(subjects):
         trianglesR = surfR.agg_data('NIFTI_INTENT_TRIANGLE')
         surfR = (nodesR, trianglesR)
 
-        parc_sub_L = nib.load("/home/victoria/server/data/COST/COST_mri/derivatives/freesurfer/sub-51902/label/lh.aparc.a2009s.annot.32k_fs_LR.label.gii").darrays[0].data
-        parc_sub_R = nib.load("/home/victoria/server/data/COST/COST_mri/derivatives/freesurfer/sub-51902/label/rh.aparc.a2009s.annot.32k_fs_LR.label.gii").darrays[0].data
+        parc_sub_L = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/freesurfer/sub-{subject}/label/lh.aparc.a2009s.annot.32k_fs_LR.label.gii").darrays[0].data
+        parc_sub_R = nib.load(f"/home/victoria/server/data/COST/COST_mri/derivatives/freesurfer/sub-{subject}/label/rh.aparc.a2009s.annot.32k_fs_LR.label.gii").darrays[0].data
 
         a1L = np.where(parc_sub_L == 33)[0]
         a1R = np.where(parc_sub_R == 33)[0]
         v1L = np.where((parc_sub_L == 43) | (parc_sub_L == 45))[0]
         v1R = np.where((parc_sub_R == 43) | (parc_sub_R == 45))[0]
 
-        dist_Tpeak_a1_L = analysis.calc_roi_dist(surfL, cortex_L, TpeakL, a1L, dist_type='min')
-        dist_Tpeak_a1_R = analysis.calc_roi_dist(surfR, cortex_R, TpeakR, a1R, dist_type='min')
+        dist_a1_v1_L = analysis.calc_roi_dist(surfL, cortex_L, a1L, v1L, dist_type='min')
+        dist_a1_v1_R = analysis.calc_roi_dist(surfR, cortex_R, a1L, v1R, dist_type='min')
 
-        dist_Tpeak_v1_L = analysis.calc_roi_dist(surfL, cortex_L, TpeakL, v1L, dist_type='min')
-        dist_Tpeak_v1_R = analysis.calc_roi_dist(surfR, cortex_R, TpeakR, v1R, dist_type='min')
-
-        if not os.path.exists(f'./distances.csv'):
-            df = pd.DataFrame(columns=['participant_id', 'Dist to A1, LH', 'Dist to A1, RH', 'Dist to V1, LH', 'Dist to V1, RH'])
-            df.to_csv('./distances.csv', index=False)
+        if not os.path.exists(f'./distances_a1_v1.csv'):
+            df = pd.DataFrame(columns=['participant_id', 'Dist A1 to V1, LH', 'Dist A1 to V1, RH'])
+            df.to_csv('./distances_a1_v1.csv', index=False)
 
         print(f"Writing results for subject {subject}")
-        with open('distances.csv', mode='a', newline='') as file:
+        with open('distances_a1_v1.csv', mode='a', newline='') as file:
             # Create a CSV writer object
             writer = csv.writer(file)
 
             # Write a new row to the CSV file
-            writer.writerow([subject, dist_Tpeak_a1_L, dist_Tpeak_a1_R, dist_Tpeak_v1_L, dist_Tpeak_v1_R])
+            writer.writerow([subject, dist_a1_v1_L, dist_a1_v1_R])
     except Exception as e:
         print(f"Error for subject {subject}: {e}")
 
