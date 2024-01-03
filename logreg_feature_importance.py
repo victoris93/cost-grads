@@ -51,25 +51,25 @@ X_train, X_test, y_train, y_test = train_test_split(data, correct, test_size=0.2
 cat_feature_names = ["sex_0", "sex_1", "FlashType_1", "FlashType_2", "NrBeeps_0", "NrBeeps_1", "NrBeeps_2"]
 feature_names = ord_features + cat_feature_names + num_features
 
-print("5-fold cross-validation...")
-cv = KFold(n_splits = 10, shuffle = True, random_state = 42)
-cv_results = cross_validate(svm_pipe, X_train, y_train, cv=cv, scoring=['accuracy', 'f1'], return_estimator =True, n_jobs = -1)
+# print("5-fold cross-validation...")
+# cv = KFold(n_splits = 10, shuffle = True, random_state = 42)
+# cv_results = cross_validate(svm_pipe, X_train, y_train, cv=cv, scoring=['accuracy', 'f1'], return_estimator =True, n_jobs = -1)
 
-print("Mean CV accuracy: ", np.mean(cv_results['test_accuracy']))
-print("Mean CV F1 ", np.mean(cv_results['test_f1']))
+# print("Mean CV accuracy: ", np.mean(cv_results['test_accuracy']))
+# print("Mean CV F1 ", np.mean(cv_results['test_f1']))
 
-coefs = pd.DataFrame(
-    [
-        est[-1].coef_[0] * est[:-1].transform(X_train.iloc[train_idx]).std(axis=0)
-        for est, (train_idx, _) in zip(cv_results["estimator"], cv.split(X_train, y_train))
-    ],
-    columns = feature_names
-)
+# coefs = pd.DataFrame(
+#     [
+#         est[-1].coef_[0] * est[:-1].transform(X_train.iloc[train_idx]).std(axis=0)
+#         for est, (train_idx, _) in zip(cv_results["estimator"], cv.split(X_train, y_train))
+#     ],
+#     columns = feature_names
+# )
 
-coefs.to_csv("cv_coefs.csv")
+# coefs.to_csv("cv_coefs.csv")
 
-y_train_pred = trained_svm.predict(X_train)
-print("Test accuracy: ", trained_svm.score(y_train, y_test))
+trained_svm = svm.fit(X_train, y_train)
+print("Test accuracy: ", trained_svm.score(X_test, y_test))
 
 from sklearn.inspection import permutation_importance
 
